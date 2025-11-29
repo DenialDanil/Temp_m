@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Temp_stat – Keyestudio ESP32</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>body{background:#000;color:#0f0;font-family:Arial;text-align:center;}</style>
+</head><body>
+<h1>Temp_stat — Живі дані з ESP32</h1>
+<div id="chart" style="width:95%;max-width:1000px;margin:auto;"></div>
+
+<script>
+const URL = "https://temp-stat-xxxx.onrender.com/data";  // ← твоя точна адреса
+Plotly.newPlot('chart',[{
+  y:[], mode:'lines+markers', name:'Температура °C', line:{color:'#ff4444'}
+},{
+  y:[], mode:'lines+markers', name:'Вологість %', yaxis:'y2', line:{color:'#4444ff'}
+}], {
+  yaxis:{title:'°C', color:'#ff4444'},
+  yaxis2:{title:'%', overlaying:'y', side:'right', color:'#4444ff'},
+  paper_bgcolor:'#000', plot_bgcolor:'#111', font:{color:'#0f0'}
+});
+
+setInterval(async()=>{
+  let d = await fetch(URL).then(r=>r.json());
+  let t = new Date().toLocaleTimeString();
+  Plotly.extendTraces('chart',{y:[[d.temp],[d.hum]], x:[[t],[t]]}, [0,1]);
+  if (Plotly.Plots.resize) Plotly.Plots.resize('chart');
+}, 5000);
+</script>
+</body></html>
