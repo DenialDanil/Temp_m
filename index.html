@@ -1,40 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Temp_stat</title>
+  <style>
+    body { font-family: Arial; text-align: center; background: white; margin-top: 100px; }
+    .value { font-size: 80px; font-weight: bold; color: #d00; }
+    .hum { color: #00d; }
+    .time { color: #555; margin-top: 50px; }
+  </style>
+</head>
+<body>
+
+  <h1>Temp_stat — живі дані з ESP32</h1>
+  <div class="value" id="temp">-- °C</div>
+  <div class="value hum" id="hum">-- %</div>
+  <div class="time" id="time"></div>
+
 <script>
-  // ←←←←← ТУТ ВСТАВ ТОЧНО СВОЮ АДРЕСУ БЕКЕНДУ ←←←←←
-  const URL = "https://temp-stat.onrender.com/data"; // ← твоя точна адреса без / в кінці
+// ←←←←← ВСТАВ СЮДИ ТОЧНО СВОЮ АДРЕСУ БЕКЕНДУ ←←←←←
+const URL = "https://temp-stat.onrender.com/data";  // ← твоя адреса
 
-  const chart = document.getElementById('chart');
-
-  // Створюємо графік
-  Plotly.newPlot(chart, [
-    { y: [], mode: 'lines+markers', name: 'Температура °C', line: {color: '#ff4444'} },
-    { y: [], mode: 'lines+markers', name: 'Вологість %', yaxis: 'y2', line: {color: '#4444ff'} }
-  ], {
-    title: 'Temp_stat – Живі дані з ESP32',
-    yaxis: {title: '°C', color: '#ff4444'},
-    yaxis2: {title: '%', overlaying: 'y', side: 'right', color: '#4444ff'},
-    paper_bgcolor: '#000', plot_bgcolor: '#111', font: {color: '#0f0'}
-  });
-
-  // Оновлення кожні 5 секунд
-  setInterval(async () => {
-    try {
-      const res = await fetch(URL + "?t=" + Date.now()); // обход кешу
-      const data = await res.json();
-      const time = new Date().toLocaleTimeString();
-
-      Plotly.extendTraces(chart, {
-        y: [[data.temp], [data.hum]],
-        x: [[time], [time]]
-      }, [0, 1]);
-
-      // обмежуємо 50 точок
-      Plotly.relayout(chart, {
-        'xaxis.autorange': true,
-        'yaxis.autorange': true
-      });
-    });
-    } catch (e) {
-      console.log("Помилка:", e);
-    }
-  }, 5000);
+setInterval(async () => {
+  try {
+    const data = await fetch(URL + "?t=" + Date.now()).then(r => r.json());
+    document.getElementById("temp").innerText = data.temp + " °C";
+    document.getElementById("hum").innerText  = data.hum + " %";
+    document.getElementById("time").innerText = "Оновлено: " + new Date().toLocaleTimeString();
+  } catch(e) {
+    document.getElementById("temp").innerText = "немає зв’язку";
+  }
+}, 3000);
 </script>
+
+</body>
+</html>
